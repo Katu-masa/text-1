@@ -1,0 +1,367 @@
+  <section class="quiz_box">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+        <div class="answer_correct"></div>
+        <div class="answer_incorrect"></div>
+        <div class="answer_result">
+            <h2 class="answer_result_title"><canvas id="myRadar" style="width: 100%; height: 300px;"></canvas></h2>
+            <div class="answer_result_text"></div>
+        </div>
+        <div class="question_number" id="js-number"></div>
+        <h2 class="question" id="js-question"></h2>
+        <div class="answer_box">            
+            <button class="answer" class="js-answer"></button>
+            <button class="answer" class="js-answer"></button>
+            <button class="answer" class="js-answer"></button>
+            <button class="answer" class="js-answer"></button>
+        </div>
+    </section>
+<style>
+button {
+  font-family: monospace;
+  background-color: #f3f7fe;
+  color: #3b82f6;
+  border: none;
+  border-radius: 8px;
+  width: 80px;
+  height: 45px;
+  transition: 0.1s;
+}
+
+button:hover {
+  background-color: #733bf6;
+  box-shadow: 0 0 0 5px #3b83f65f;
+  color: #fff;
+}
+
+
+
+
+
+
+.quiz_box {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  background-color: #fdde98;
+  margin: 0 auto;
+  margin-top: 40px;
+}
+
+.quiz_box .answer_correct {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: #e1e1e1;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.1s;
+}
+
+
+
+.quiz_box .answer_incorrect {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: #e1e1e1;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.1s;
+}
+
+
+
+
+.quiz_box .answer_result {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background-color: #fdde98;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.1s;
+}
+
+.quiz_box .answer_result .answer_result_title {
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: solid 1px #a0a0a0;
+  font-size: 24px;
+}
+
+.quiz_box .answer_result .answer_result_text {
+  padding: 20px;
+text-align:center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.quiz_box .active_answer {
+  visibility: visible;
+  opacity: 0.8;
+}
+
+.quiz_box .active_result {
+  visibility: visible;
+  opacity: 1;
+}
+
+.quiz_box .question_number {
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: solid 1px #a0a0a0;
+  font-weight: bold;
+}
+
+.quiz_box .question {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.quiz_box .answer_box {
+display: flex;
+flex-wrap: wrap;
+justify-content: space-between;
+  margin: 10 auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  width: 400px;
+}
+
+.quiz_box .answer_box .answer {
+  border: solid 1px #000000;
+  width: 40%;
+  margin-top: 20px;
+  margin-right: 20px;
+  margin-left: 20px;
+  padding: 10px;
+  cursor: pointer;
+}
+</style>
+
+
+
+
+
+
+
+
+
+
+<script>
+const quiz = [
+            {
+                questionNumber: 'スマッシュ1',
+                question: 'ネットミスをせずに打てる',answers: ['できない','たまにできる','まあまあできる','できる',],},
+{questionNumber: 'スマッシュ2',question: '連続で打ってもミスをしない',answers: ['できない','たまにできる','まあまあできる','できる',],},
+{questionNumber: 'スマッシュ3',question: '角度のあるスマッシュを打てる',answers: ['できない','たまにできる','まあまあできる','できる',],  },
+{questionNumber: 'レシーブ4',question: '相手のスマッシュを奥まで高く返せる',answers: ['できない','たまにできる','まあまあできる','できる',],  },
+{questionNumber: 'レシーブ5',question: '自分のフォア側や胸に来たスマッシュも返せる',answers: ['できない','たまにできる','まあまあできる','できる',],  },
+{questionNumber: 'レシーブ6',question: '相手のスマッシュをドライブで返せる',answers: ['できない','たまにできる','まあまあできる','できる',],  },
+{questionNumber: 'ヘアピン7',question: '高い位置でヘアピンが打てる',answers: ['できない','たまにできる','まあまあできる','できる',],  },
+{questionNumber: 'ヘアピン8',question: 'クロスネットをヘアピンと同じ入り方で打ち分けることができる',answers: ['できない','たまにできる','まあまあできる','できる',],  },
+{questionNumber: 'ヘアピン9',question: 'ヘアピンと同じ入りで奥に返すことができる',answers: ['できない','たまにできる','まあまあできる','できる',],  },
+        ]
+
+        let quizCount = 0;
+        const quizLength = quiz.length;
+        let score = 0;
+        let n1 = 0;
+        let n2 = 0;
+        let n3 = 0;
+
+        let av1 = 0;
+        let av2 = 0;
+        let av3 = 0;
+
+        let ava1 = 0;
+        let ava2 = 0;
+        let ava3 = 0;
+
+        const $button = document.querySelectorAll('.answer');
+        const buttonLength = $button.length
+
+        const setupQuiz = () => {
+            document.getElementById('js-question').textContent = quiz[quizCount].question
+            document.getElementById('js-number').textContent = quiz[quizCount].questionNumber
+            
+            let buttonCount = 0;
+
+            while (buttonCount < buttonLength) {
+                $button[buttonCount].textContent = quiz[quizCount].answers[buttonCount]
+                buttonCount++;
+            }
+        }
+        setupQuiz();
+        let clickedCount = 0;
+        while (clickedCount < buttonLength) {
+            $button[clickedCount].addEventListener("click", function () {
+                const clickedAnswer = event.currentTarget
+                const answerCorrect = document.querySelector('.answer_correct');
+                const answerIncorrect = document.querySelector('.answer_incorrect');
+                const answerResult = document.querySelector('.answer_result');
+                const answerResultText = document.querySelector('.answer_result_text')
+
+                if ('できない' === clickedAnswer.textContent) {
+                    answerCorrect.classList.add("active_answer")
+                    setTimeout (function(){
+                        answerCorrect.classList.remove("active_answer")
+                    }, 1000);
+                    if(quizCount < 3){
+                    n1 = Number(n1) + 1 ;
+                    }
+                    else if(quizCount < 6){
+                    n2 = Number(n2) + 1 ;
+                    }
+                    else{
+                    n3 = Number(n3) + 1 ;
+                    }
+                }
+                else if ('たまにできる' === clickedAnswer.textContent) {
+                    answerCorrect.classList.add("active_answer")
+                    setTimeout (function(){
+                        answerCorrect.classList.remove("active_answer")
+                    }, 1000);
+                    if(quizCount < 3){
+                    n1 = Number(n1) + 2 ;
+                    }
+                    else if(quizCount < 6){
+                    n2 = Number(n2) + 2 ;
+                    }
+                    else{
+                    n3 = Number(n3) + 2 ;
+                    }
+                }
+                else if ('まあまあできる' === clickedAnswer.textContent) {
+                    answerCorrect.classList.add("active_answer")
+                    setTimeout (function(){
+                        answerCorrect.classList.remove("active_answer")
+                    }, 1000);
+                    if(quizCount < 3){
+                    n1 = Number(n1) + 3 ;
+                    }
+                    else if(quizCount < 6){
+                    n2 = Number(n2) + 3 ;
+                    }
+                    else{
+                    n3 = Number(n3) + 3 ;
+                    }
+                }
+                else {
+                    answerCorrect.classList.add("active_answer")
+                    setTimeout (function(){
+                        answerCorrect.classList.remove("active_answer")
+                    }, 1000);
+                    if(quizCount < 3){
+                    n1 = Number(n1) + 4 ;
+                    }
+                    else if(quizCount < 6){
+                    n2 = Number(n2) + 4 ;
+                    }
+                    else{
+                    n3 = Number(n3) + 4 ;
+                    }
+                }
+
+                quizCount++;
+                if (quizCount < quizLength) {
+                    setTimeout (function(){
+                    setupQuiz();
+                }, 1000);
+                }
+                else {
+                    answerResult.classList.add("active_result")
+                    av1 = Number(n1) / 3
+                    av2 = Number(n2) / 3
+                    av3 = Number(n3) / 3
+
+ 
+if(av1 < 1.5){
+                    ava1 = "D"
+}
+else if(av1 < 2.5){
+                    ava1 = "C"
+}
+else if(av1 < 3.5){
+                    ava1 = "B"
+}
+else {
+                    ava1 = "A"
+}
+
+if(av2 < 1.5){
+                    ava2 = "D"
+}
+else if(av2 < 2.5){
+                    ava2 = "C"
+}
+else if(av2 < 3.5){
+                    ava2 = "B"
+}
+else {
+                    ava2 = "A"
+}
+
+if(av3 < 1.5){
+                    ava3 = "D"
+}
+else if(av3 < 2.5){
+                    ava3 = "C"
+}
+else if(av3 < 3.5){
+                    ava3 = "B"
+}
+else {
+                    ava3 = "A"
+}
+
+                    answerResultText.innerText = 'スマッシュ:' + ava1 + "\n レシーブ: "  + ava2 + "\n ネット: " + ava3
+
+
+
+                    var myRadarElement = document.getElementById("myRadar");
+                    var myRadar = new Chart(myRadarElement, {
+                      type: 'radar', // チャートのタイプ
+                      data: { // チャートの内容
+                        labels: ["スマッシュ", "レシーブ", "ネット"],
+                        datasets: [{
+                          label: 'あなたのバドミントン能力',
+                          lineTension: 0, // ベジェ曲線を無効化
+                          data: [av1, av2, av3],
+                          backgroundColor: 'RGBA(182,39,93, 0.4)',
+                          borderColor: 'RGBA(182,39,93, 1)',
+                          borderWidth: 1,
+                          pointBackgroundColor: 'RGB(46,106,177)'
+                        }]},
+                        options: { 
+                          scale:{
+                            ticks:{
+                              suggestedMin: 0,
+                              suggestedMax: 4,
+                              stepSize: 1
+                            }
+                          }
+                        }
+                      });
+                    }
+                  });            
+                  clickedCount++;
+}
+</script>
